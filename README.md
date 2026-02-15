@@ -16,7 +16,7 @@ Temos os seguintes contratos:
 
 - `npm start` roda a api
 - `npm run dev` roda a api em ambiente de desenvolvimento com `--watch` nativo do node para hot-reload
-- `npm run reset-compose` desce e sobe novamente o compose
+- `npm run reset-compose` desce e sobe novamente o compose, **obs: esse comando reseta tudo, inclusive remove todas imagens e containers do sistema**
 
 ## Docker
 
@@ -39,3 +39,9 @@ depends_on:
 ```
 
 Usamos no volume do database o arquivo `docker-entrypoint-initdb.d` para subir já com um dump para o MYSQL, o dump é o arquivo `lifecash.sql`. Resumindo se o DB estiver vázio ele usa o dump, caso já exista algo no volume ele desconsidera.
+
+## Conexão com o DB
+
+- Estamos usando o client mysql2 para se comunicar com o DB
+
+Foi criado um Pool de conexões no caminho db/connection.js, este está usando o dotenv para pegar as variáveis, foi definido um limite de 10 conexões simultâneas já que o projeto não necessita de mais e nem de multiplas camadas de pooling.
