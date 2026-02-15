@@ -11,7 +11,7 @@ services:
       database:
         condition: service_healthy # espera o serviço de database estar funcionando de forma saúdavel
     volumes:
-      - api_v:/api
+      - .:/api
   database:
     image: mysql:8.4
     restart: always
@@ -25,10 +25,16 @@ services:
       - ./lifecash.sql:/docker-entrypoint-initdb.d/init.sql # usamos a pasta docker-entrypoint-initdb.d para inicializar o db com o dump
     healthcheck:
       test:
-        ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "database",
+          "-u",
+          "root",
+          "-psecret",
+        ]
       interval: 5s
       timeout: 5s
       retries: 5
-
-volumes:
-  api_v:
