@@ -1,0 +1,35 @@
+services:
+  api:
+    build: ./api
+    restart: always
+    container_name: api_cash
+    env_file:
+      - .env
+    expose:
+      - 3000
+    depends_on:
+      - database:
+          condition: service_healthy # espera o serviço de database estar funcionando de forma saúdavel
+    volumes:
+      - api_v:/api
+  database:
+    image: mysql:8.4
+    restart: always
+    container_name: mysql_cash
+    environment:
+      - MYSQL_DATABASE=api_data
+      - DB_ROOT_PASSWORD=secret
+    expose:
+      - 3306
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test:
+        ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mysql_data:
+  api_v:
