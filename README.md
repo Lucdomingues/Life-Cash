@@ -1,11 +1,22 @@
 # API LIFECASH
 
-descrição
+API Rest para registrar as receitas e despesas de uma pessoa!
+
+Temos os seguintes contratos:
+
+- Tabela people: que armazenará informações das pessoas que utilizarão a aplicação;
+- Tabela transactions: que armazenará informações sobre as transações de despesa ou receita das pessoas cadastradas;
+- Tabela logs: que armazenará os logs das operações realizadas nas tabelas people e transactions.
+
+## Diagrama ER(Entidade Relacionamento)
+
+![Diagrama ER](./images/diagramER.png)
 
 ## Configurações iniciais
 
 - `npm start` roda a api
 - `npm run dev` roda a api em ambiente de desenvolvimento com `--watch` nativo do node para hot-reload
+- `npm run reset-compose` desce e sobe novamente o compose
 
 ## Docker
 
@@ -26,3 +37,5 @@ depends_on:
       - database:
           condition: service_healthy # espera o serviço de database estar funcionando de forma saúdavel
 ```
+
+Usamos no volume do database o arquivo `docker-entrypoint-initdb.d` para subir já com um dump para o MYSQL, o dump é o arquivo `lifecash.sql`. Resumindo se o DB estiver vázio ele usa o dump, caso já exista algo no volume ele desconsidera.

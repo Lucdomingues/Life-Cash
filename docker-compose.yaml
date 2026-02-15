@@ -1,15 +1,15 @@
 services:
   api:
-    build: ./api
+    build: .
     restart: always
     container_name: api_cash
     env_file:
       - .env
-    expose:
-      - 3000
+    ports:
+      - 3000:3000
     depends_on:
-      - database:
-          condition: service_healthy # espera o serviço de database estar funcionando de forma saúdavel
+      database:
+        condition: service_healthy # espera o serviço de database estar funcionando de forma saúdavel
     volumes:
       - api_v:/api
   database:
@@ -18,11 +18,11 @@ services:
     container_name: mysql_cash
     environment:
       - MYSQL_DATABASE=api_data
-      - DB_ROOT_PASSWORD=secret
-    expose:
-      - 3306
+      - MYSQL_ROOT_PASSWORD=secret
+    ports:
+      - 3306:3306
     volumes:
-      - mysql_data:/var/lib/mysql
+      - ./lifecash.sql:/docker-entrypoint-initdb.d/init.sql # usamos a pasta docker-entrypoint-initdb.d para inicializar o db com o dump
     healthcheck:
       test:
         ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
@@ -31,5 +31,4 @@ services:
       retries: 5
 
 volumes:
-  mysql_data:
   api_v:
