@@ -59,3 +59,9 @@ O disparo desses erros são realizados dessa maneira:
 No Middleware também tratamos `error 500`.
 
 O unico lugar que tratamos error com `try/catch` é no service, pois podem vir exceções do DB caso alguma regra seja infligida.
+
+## Middlewares
+
+Temos a pasta middlewares e dentro a pasta schema, para a validação dos formatos de body, params e querys estamos usando a biblioteca **zod**, para melhor legibilidade e escalabilidade.
+
+Em `middlewares/validateFormat.middleware.js` está um middleware genérico para validar os schemas que serão inseridos na camada de `Routes`.
