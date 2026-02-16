@@ -45,3 +45,17 @@ Usamos no volume do database o arquivo `docker-entrypoint-initdb.d` para subir j
 - Estamos usando o client mysql2 para se comunicar com o DB
 
 Foi criado um Pool de conexões no caminho db/connection.js, este está usando o dotenv para pegar as variáveis, foi definido um limite de 10 conexões simultâneas já que o projeto não necessita de mais e nem de multiplas camadas de pooling.
+
+Temos o arquivo `./db/PeopleDB` que substituí o papel da camada model, comunicando com o DB através das funções do aplicativo mysql2 e querys SQL.
+
+## Tratamento de Erro
+
+Foi construido um middleware para tratar erros globalmente, tornando a api mais limpa, removendo a necessidade de vários `try/catch` na camada controller. Disparamos os erros instânciando a classe `AppError`, uma classe de erro personalizada herdada de `Error`.
+
+O disparo desses erros são realizados dessa maneira:
+
+`throw new AppError(STATUS, MESSAGE_ERROR);`
+
+No Middleware também tratamos `error 500`.
+
+O unico lugar que tratamos error com `try/catch` é no service, pois podem vir exceções do DB caso alguma regra seja infligida.
