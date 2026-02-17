@@ -15,8 +15,8 @@ export const getPeople = async () => {
 export const getPeopleId = async (id) => {
   const [people] = await getById(id);
 
-  if (people.length === 0) {
-    // se não houver cadastros responderá com erro
+  if (people === undefined) {
+    // se não houver pessoa retornará um erro
     throw new AppError(404, "Pessoa não encontradas!");
   }
 

@@ -1,17 +1,16 @@
 import AppError from "../error/AppError.js";
 
-const validateFormat = (schema) => {
+const validateFormat = (schema, property = "body") => {
   // criamos um middleware genérico para validar o formato das requisições
   return (req, _res, next) => {
-    const result = schema.safeParse(req.body); // nosso schema irá receber o req.body para validar se for true ele retornará sucess=true se não retornará ZodError
+    const result = schema.safeParse(req[property]); // nosso schema irá receber o req.propriedade para validar se for true ele retornará sucess=true se não retornará ZodError
 
     if (!result.success) {
-      const parseMessage = JSON.parse(result.error.message); // esse message vem como string
-      const message = parseMessage.map((e) => e.message)[0]; // dentro do message tem um array com outro message, acessamos ele aqui
+      const message = result.error.issues[0].message; // pagamos a mensagem de erro
       throw new AppError(400, message); // lançamos uma exceção para o middleware de erro global
     }
 
-    // req.body = result.data;  no zod podemos alterar tipos, e retornamos o result com o tipo alterado, porém para essa requisição não será necessário
+    req.body = result.data; // no zod podemos alterar tipos, e retornamos o result com o tipo alterado
     next();
   };
 };

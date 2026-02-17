@@ -40,6 +40,8 @@ depends_on:
 
 Usamos no volume do database o arquivo `docker-entrypoint-initdb.d` para subir já com um dump para o MYSQL, o dump é o arquivo `lifecash.sql`. Resumindo se o DB estiver vázio ele usa o dump, caso já exista algo no volume ele desconsidera.
 
+O volume para persistência dos dados do DB é `mysql_data` recebendo dados do `/var/lib/mysql`, onde o mysql guarda todas as infos do DB.
+
 ## Conexão com o DB
 
 - Estamos usando o client mysql2 para se comunicar com o DB

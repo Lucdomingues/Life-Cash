@@ -10,3 +10,7 @@ export const createUserSchema = z.object({
   email: z.email("Email precisa estar em um formato válido!"), // Valida que é um email válido, string, existe
   phone: z.string("Telefone precisa ser uma string!").optional(), // Validade se é string e é opcional
 });
+// criando schema para validar se id é um número válido
+export const idSchema = z.object({
+  id: z.coerce.number("O identificador precisa ser um número!"), // coerce tranforma o tipo para o especificado, depois valida o tipo
+});
