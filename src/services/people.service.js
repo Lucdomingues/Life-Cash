@@ -1,14 +1,32 @@
-import { create } from "../db/PeopleDB.js";
+import { create, getAll, getById } from "../db/PeopleDB.js";
 import AppError from "../error/AppError.js";
 
-export const createPeople = async (body) => {
-  try {
-    const createdPeople = await create(body);
+export const getPeople = async () => {
+  const peoples = await getAll();
 
-    const bodyPeople = { id: createdPeople, ...body };
-
-    return { status: 201, message: bodyPeople };
-  } catch (err) {
-    throw new AppError(400, `Erro ao criar a pessoa! Error: ${err.message}`);
+  if (peoples.length === 0) {
+    // se não houver cadastros responderá com erro
+    throw new AppError(404, "Pessoas não encontradas!");
   }
+
+  return { status: 200, message: peoples };
+};
+
+export const getPeopleId = async (id) => {
+  const [people] = await getById(id);
+
+  if (people === undefined) {
+    // se não houver pessoa retornará um erro
+    throw new AppError(404, "Pessoa não encontradas!");
+  }
+
+  return { status: 200, message: people };
+};
+
+export const createPeople = async (body) => {
+  const createdPeople = await create(body);
+
+  const bodyPeople = { id: createdPeople, ...body }; // Cria um objeto relacionando seu respectivo id com suas informações para a Response
+
+  return { status: 201, message: bodyPeople };
 };

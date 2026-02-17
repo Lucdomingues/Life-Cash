@@ -40,6 +40,8 @@ depends_on:
 
 Usamos no volume do database o arquivo `docker-entrypoint-initdb.d` para subir já com um dump para o MYSQL, o dump é o arquivo `lifecash.sql`. Resumindo se o DB estiver vázio ele usa o dump, caso já exista algo no volume ele desconsidera.
 
+O volume para persistência dos dados do DB é `mysql_data` recebendo dados do `/var/lib/mysql`, onde o mysql guarda todas as infos do DB.
+
 ## Conexão com o DB
 
 - Estamos usando o client mysql2 para se comunicar com o DB
@@ -59,3 +61,13 @@ O disparo desses erros são realizados dessa maneira:
 No Middleware também tratamos `error 500`.
 
 O unico lugar que tratamos error com `try/catch` é no service, pois podem vir exceções do DB caso alguma regra seja infligida.
+
+### Mapeamento de erros vindos do mysql
+
+Os erros serão centralizados em apenas um lugar o middleware de erro, para isso tivemos que encontrar uma solução para tratar erros vindos do sql, inclusive, regras de negócios como `Pessoa já cadastrada!`, assim criamos um **mapeamento de erros sql**, o mysql lança o erro e com base em seu code definimos as mensagens e entregamos ao cuidado do middleware global. O mapeamento está no mesmo diretório do middleware de erro em: `./error/mapErrorSql.js`.
+
+## Middlewares
+
+Temos a pasta middlewares e dentro a pasta schema, para a validação dos formatos de body, params e querys estamos usando a biblioteca **zod**, para melhor legibilidade e escalabilidade.
+
+Em `middlewares/validateFormat.middleware.js` está um middleware genérico para validar os schemas que serão inseridos na camada de `Routes`.
