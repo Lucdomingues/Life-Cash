@@ -1,7 +1,7 @@
 import { create, getAll, getByEmail } from "../db/PeopleDB.js";
 import AppError from "../error/AppError.js";
 
-export const getPeople = async () => {
+export const getPeople = async (id) => {
   const peoples = await getAll();
 
   if (peoples.length === 0) {
