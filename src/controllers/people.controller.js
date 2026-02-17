@@ -1,4 +1,10 @@
-import { createPeople } from "../services/people.service.js";
+import { createPeople, getPeople } from "../services/people.service.js";
+
+export const getPeopleController = async (_req, res) => {
+  const { status, message } = await getPeople();
+
+  return res.status(status).json(message);
+};
 
 export const createPeopleController = async (req, res) => {
   const { status, message } = await createPeople(req.body);
