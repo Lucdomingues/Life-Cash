@@ -1,7 +1,7 @@
-import { create, getAll, getByEmail } from "../db/PeopleDB.js";
+import { create, getAll, getById } from "../db/PeopleDB.js";
 import AppError from "../error/AppError.js";
 
-export const getPeople = async (id) => {
+export const getPeople = async () => {
   const peoples = await getAll();
 
   if (peoples.length === 0) {
@@ -10,6 +10,17 @@ export const getPeople = async (id) => {
   }
 
   return { status: 200, message: peoples };
+};
+
+export const getPeopleId = async (id) => {
+  const [people] = await getById(id);
+
+  if (people.length === 0) {
+    // se não houver cadastros responderá com erro
+    throw new AppError(404, "Pessoa não encontradas!");
+  }
+
+  return { status: 200, message: people };
 };
 
 export const createPeople = async (body) => {

@@ -60,6 +60,10 @@ No Middleware também tratamos `error 500`.
 
 O unico lugar que tratamos error com `try/catch` é no service, pois podem vir exceções do DB caso alguma regra seja infligida.
 
+### Mapeamento de erros vindos do mysql
+
+Os erros serão centralizados em apenas um lugar o middleware de erro, para isso tivemos que encontrar uma solução para tratar erros vindos do sql, inclusive, regras de negócios como `Pessoa já cadastrada!`, assim criamos um **mapeamento de erros sql**, o mysql lança o erro e com base em seu code definimos as mensagens e entregamos ao cuidado do middleware global. O mapeamento está no mesmo diretório do middleware de erro em: `./error/mapErrorSql.js`.
+
 ## Middlewares
 
 Temos a pasta middlewares e dentro a pasta schema, para a validação dos formatos de body, params e querys estamos usando a biblioteca **zod**, para melhor legibilidade e escalabilidade.
