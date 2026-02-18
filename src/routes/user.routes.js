@@ -3,6 +3,7 @@ import {
   createPeopleController,
   getPeopleController,
   getPeopleIdController,
+  updatePeopleController,
 } from "../controllers/people.controller.js";
 import { validateFormat } from "../middlewares/index.js";
 import {
@@ -19,5 +20,6 @@ router.post(
   validateFormat(createUserSchema, "body"),
   createPeopleController,
 );
+router.put("/:id", updatePeopleController);
 
 export default router;

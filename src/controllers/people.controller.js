@@ -2,6 +2,7 @@ import {
   createPeople,
   getPeople,
   getPeopleId,
+  updatePeople,
 } from "../services/people.service.js";
 
 export const getPeopleController = async (_req, res) => {
@@ -18,6 +19,12 @@ export const getPeopleIdController = async (req, res) => {
 
 export const createPeopleController = async (req, res) => {
   const { status, message } = await createPeople(req.body);
+
+  return res.status(status).json(message);
+};
+
+export const updatePeopleController = async (req, res) => {
+  const { status, message } = await updatePeople(req.body, req.params.id);
 
   return res.status(status).json(message);
 };

@@ -32,3 +32,12 @@ export const create = async ({ first_name, last_name, email, phone }) => {
 
   return results.insertId;
 };
+
+export const update = async (keys, values) => {
+  const [results] = await connection.execute(
+    `UPDATE people SET ${keys}  WHERE id = ?`, // keys já vem no formato nome-da-key=?
+    values, // value já vem no formato de array com os valores nas posições corretas inclusive o id
+  );
+
+  return results;
+};
