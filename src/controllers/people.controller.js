@@ -1,3 +1,4 @@
+import AppError from "../error/AppError.js";
 import {
   createPeople,
   getPeople,
@@ -13,6 +14,10 @@ export const getPeopleController = async (_req, res) => {
 
 export const getPeopleIdController = async (req, res) => {
   const { status, message } = await getPeopleId(req.params.id);
+
+  if (status === 404) {
+    throw new AppError(404, "Pessoa não encontrada!");
+  }
 
   return res.status(status).json(message);
 };

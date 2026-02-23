@@ -24,10 +24,10 @@ export const getByEmail = async (email) => {
   return result;
 };
 
-export const create = async ({ first_name, last_name, email, phone }) => {
+export const create = async (keys, values, questions) => {
   const [results] = await connection.execute(
-    "INSERT INTO people (first_name, last_name, email, phone) VALUES (?, ?, ?, ?);",
-    [first_name, last_name, email, phone],
+    `INSERT INTO people (${keys}) VALUES (${questions});`,
+    values,
   );
 
   return results.insertId;
@@ -35,7 +35,7 @@ export const create = async ({ first_name, last_name, email, phone }) => {
 
 export const update = async (keys, values) => {
   const [results] = await connection.execute(
-    `UPDATE people SET ${keys}  WHERE id = ?`, // keys já vem no formato nome-da-key=?
+    `UPDATE people SET ${keys} WHERE id = ?`, // keys já vem no formato nome-da-key=?
     values, // value já vem no formato de array com os valores nas posições corretas inclusive o id
   );
 
