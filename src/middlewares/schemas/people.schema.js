@@ -9,7 +9,10 @@ export const createUserSchema = z.object({
     .min(1, "Sobrenome é obrigatório!"), // valida se é string, se existe e se tem no mínimo um caracter
   email: z.email("Email precisa estar em um formato válido!"), // Valida que é um email válido, string, existe
   phone: z.string("Telefone precisa ser uma string!").optional(), // Validade se é string e é opcional
-  // active: z.boolean("É necessário ser um boolean"),
+  deleted_at: z
+    .date("É necessário que seja uma data no formato 'YYYY-MM-DD HH:MM:SS'")
+    .nullable()
+    .optional(),
 });
 export const updateUserSchema = z.object({
   first_name: z
@@ -22,7 +25,10 @@ export const updateUserSchema = z.object({
     .optional(), // valida se é string, se existe e se tem no mínimo um caracter
   email: z.email("Email precisa estar em um formato válido!").optional(), // Valida que é um email válido, string, existe
   phone: z.string("Telefone precisa ser uma string!").optional(), // Validade se é string e é opcional
-  // active: z.boolean("É necessário ser um boolean").optional(),
+  deleted_at: z
+    .date("É necessário que seja uma data no formato 'YYYY-MM-DD HH:MM:SS'")
+    .nullable()
+    .optional(),
 });
 // criando schema para validar se id é um número válido
 export const idSchema = z.object({

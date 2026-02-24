@@ -6,7 +6,7 @@ CREATE TABLE people (
     last_name VARCHAR(45) NOT NULL,
     email VARCHAR(60) NOT NULL UNIQUE,
     phone VARCHAR(20) NOT NULL,
-    active BOOLEAN NOT NULL
+    deleted_at DATETIME NULL
 );
 
 CREATE TABLE transactions (

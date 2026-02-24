@@ -1,6 +1,7 @@
 import AppError from "../error/AppError.js";
 import {
   createPeople,
+  deletedPeople,
   getPeople,
   getPeopleId,
   updatePeople,
@@ -15,10 +16,6 @@ export const getPeopleController = async (_req, res) => {
 export const getPeopleIdController = async (req, res) => {
   const { status, message } = await getPeopleId(req.params.id);
 
-  if (status === 404) {
-    throw new AppError(404, "Pessoa não encontrada!");
-  }
-
   return res.status(status).json(message);
 };
 
@@ -30,6 +27,12 @@ export const createPeopleController = async (req, res) => {
 
 export const updatePeopleController = async (req, res) => {
   const { status, message } = await updatePeople(req.body, req.params.id);
+
+  return res.status(status).json(message);
+};
+
+export const deletePeopleController = async (req, res) => {
+  const { status, message } = await deletedPeople(req.params.id);
 
   return res.status(status).json(message);
 };

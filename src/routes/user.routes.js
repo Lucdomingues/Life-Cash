@@ -1,6 +1,7 @@
 import express from "express";
 import {
   createPeopleController,
+  deletePeopleController,
   getPeopleController,
   getPeopleIdController,
   updatePeopleController,
@@ -26,6 +27,12 @@ router.put(
   validateFormat(idSchema, "params"),
   validateFormat(updateUserSchema, "body"),
   updatePeopleController,
+);
+
+router.delete(
+  "/:id",
+  validateFormat(idSchema, "params"),
+  deletePeopleController,
 );
 
 export default router;

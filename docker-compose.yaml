@@ -31,7 +31,7 @@ services:
           "mysqladmin",
           "ping",
           "-h",
-          "database",
+          "127.0.0.1",
           "-u",
           "root",
           "-psecret",
