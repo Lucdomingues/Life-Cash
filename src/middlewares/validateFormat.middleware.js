@@ -10,7 +10,7 @@ const validateFormat = (schema, property = "body") => {
       throw new AppError(400, message); // lançamos uma exceção para o middleware de erro global
     }
 
-    req.body = result.data; // no zod podemos alterar tipos, e retornamos o result com o tipo alterado
+    // req.body = result.data; // no zod podemos alterar tipos, e retornamos o result com o tipo alterado
     next();
   };
 };

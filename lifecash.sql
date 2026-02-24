@@ -5,7 +5,8 @@ CREATE TABLE people (
     first_name VARCHAR(45) NOT NULL,
     last_name VARCHAR(45) NOT NULL,
     email VARCHAR(60) NOT NULL UNIQUE,
-    phone VARCHAR(20) NOT NULL
+    phone VARCHAR(20) NOT NULL,
+    deleted_at DATETIME NULL
 );
 
 CREATE TABLE transactions (
@@ -15,14 +16,14 @@ CREATE TABLE transactions (
     price DECIMAL(10,2) NOT NULL,
     type ENUM('despesa', 'renda') NOT NULL,
     person_id INT,
-    CONSTRAINT fk_transaction_person_id FOREIGN KEY (person_id) REFERENCES people(id) ON DELETE CASCADE
+    CONSTRAINT fk_transaction_person_id FOREIGN KEY (person_id) REFERENCES people(id)
 );
 
 CREATE TABLE logs (
      id INT PRIMARY KEY AUTO_INCREMENT,
     event VARCHAR(100) NOT NULL,
-    timestamp BIGINT NOT NULL,
+    timestamp timestamp NOT NULL,
     type INT NOT NULL,
     person_id INT,
-    CONSTRAINT fk_logs_person_id FOREIGN KEY (person_id) REFERENCES people(id) ON DELETE CASCADE /*ON DELETE CASCADE (ao deletar uma pessoa o registros são deletado juntos, como logs e transactions)*/
+    CONSTRAINT fk_logs_person_id FOREIGN KEY (person_id) REFERENCES people(id)
 );
