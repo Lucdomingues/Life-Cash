@@ -64,7 +64,7 @@ export const deletedPeople = async (id) => {
 };
 
 export const getPeopleLogs = async (id) => {
-  const logs = await getLogs(id);
+  const logs = await getLogs(id, "people");
 
   if (logs.length === 0) throw new AppError(404, "Logs não encontrados!"); // lança erro caso não exista
 
