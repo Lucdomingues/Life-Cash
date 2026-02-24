@@ -1,10 +1,17 @@
 import connection from "./connection.js";
 
-const insertLogs = async (event, person_id) => {
+export const insertLogs = async (event, entity, person_id) => {
   await connection.execute(
-    `INSERT INTO logs (event, timestamp, person_id) VALUES (?, CURRENT_TIMESTAMP, ?)`,
-    [event, person_id],
+    `INSERT INTO logs (event, timestamp, entity, person_id) VALUES (?, CURRENT_TIMESTAMP, ?, ?)`,
+    [event, entity, person_id],
   );
 };
 
-export default insertLogs;
+export const getLogs = async (person_id) => {
+  const [logs] = await connection.execute(
+    `SELECT * FROM logs WHERE person_id = ?;`,
+    [person_id],
+  );
+
+  return logs;
+};

@@ -23,7 +23,7 @@ CREATE TABLE logs (
      id INT PRIMARY KEY AUTO_INCREMENT,
     event VARCHAR(100) NOT NULL,
     timestamp timestamp NOT NULL,
-    type INT NOT NULL,
+    entity VARCHAR(50) NOT NULL,
     person_id INT,
     CONSTRAINT fk_logs_person_id FOREIGN KEY (person_id) REFERENCES people(id)
 );

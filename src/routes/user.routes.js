@@ -2,6 +2,7 @@ import express from "express";
 import {
   createPeopleController,
   deletePeopleController,
+  getLogPeopleController,
   getPeopleController,
   getPeopleIdController,
   updatePeopleController,
@@ -33,6 +34,12 @@ router.delete(
   "/:id",
   validateFormat(idSchema, "params"),
   deletePeopleController,
+);
+
+router.get(
+  "/:id/logs",
+  validateFormat(idSchema, "params"),
+  getLogPeopleController,
 );
 
 export default router;
