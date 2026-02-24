@@ -1,9 +1,9 @@
-import AppError from "../error/AppError.js";
 import {
   createPeople,
   deletedPeople,
   getPeople,
   getPeopleId,
+  getPeopleLogs,
   updatePeople,
 } from "../services/people.service.js";
 
@@ -33,6 +33,12 @@ export const updatePeopleController = async (req, res) => {
 
 export const deletePeopleController = async (req, res) => {
   const { status, message } = await deletedPeople(req.params.id);
+
+  return res.status(status).json(message);
+};
+
+export const getLogPeopleController = async (req, res) => {
+  const { status, message } = await getPeopleLogs(req.params.id);
 
   return res.status(status).json(message);
 };

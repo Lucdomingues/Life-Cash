@@ -1,3 +1,4 @@
+import { insertLogs, getLogs } from "../db/LogsDB.js";
 import { create, deleted, getAll, getById, update } from "../db/PeopleDB.js";
 import AppError from "../error/AppError.js";
 
@@ -29,6 +30,8 @@ export const createPeople = async (body) => {
     tranformQuestion,
   ); // a validação se o usuário já existe está no mapErrorSql.js
 
+  await insertLogs("CREATED_PEOPLE", "people", createdPeople); // inseri log para registrar no histórico a criação dessa pessoa
+
   const bodyPeople = { id: createdPeople, ...body }; // Cria um objeto relacionando seu respectivo id com suas informações para a Response
 
   return { status: 201, message: bodyPeople };
@@ -45,6 +48,8 @@ export const updatePeople = async (body, id) => {
   if (updated.affectedRows === 0)
     throw new AppError(404, "Pessoa não encontrada"); // lança erro caso não exista
 
+  await insertLogs("UPDATED_PEOPLE", "people", id); // inseri log para registrar no histórico a atualização dessa pessoa
+
   return { status: 200, message: "Atualizado com sucesso!" };
 };
 
@@ -53,5 +58,15 @@ export const deletedPeople = async (id) => {
 
   if (del.affectedRows === 0) throw new AppError(404, "Pessoa não encontrada"); // lança erro caso não exista
 
+  await insertLogs("DELETED_PEOPLE", "people", id); // inseri log para registrar no histórico a desativação dessa pessoa
+
   return { status: 200, message: "Desativado com sucesso!" };
+};
+
+export const getPeopleLogs = async (id) => {
+  const logs = await getLogs(id);
+
+  if (logs.length === 0) throw new AppError(404, "Logs não encontrados!"); // lança erro caso não exista
+
+  return { status: 200, message: logs };
 };
