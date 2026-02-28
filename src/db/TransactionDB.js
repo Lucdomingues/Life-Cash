@@ -5,3 +5,12 @@ export const get = async () => {
 
   return results;
 };
+
+export const create = async (columns, n_values, values) => {
+  const [result] = await connection.execute(
+    `INSERT INTO transactions (${columns}) VALUES (${n_values});`,
+    values,
+  );
+
+  return result;
+};
