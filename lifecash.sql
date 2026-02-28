@@ -15,6 +15,7 @@ CREATE TABLE transactions (
     description VARCHAR(300),
     price DECIMAL(10,2) NOT NULL,
     type ENUM('despesa', 'renda') NOT NULL,
+    created_at TIMESTAMP NOT NULL,
     person_id INT,
     CONSTRAINT fk_transaction_person_id FOREIGN KEY (person_id) REFERENCES people(id)
 );
