@@ -11,9 +11,9 @@ import {
 import { validateFormat } from "../middlewares/index.js";
 import {
   createUserSchema,
-  idSchema,
   updateUserSchema,
 } from "../middlewares/schemas/people.schema.js";
+import { idSchema } from "../middlewares/schemas/id.schema.js";
 
 const router = express.Router(); // criamos um mini projeto de rotas, com várias funções para que possamos trabalhar com rotas
 

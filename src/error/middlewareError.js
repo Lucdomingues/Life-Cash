@@ -5,6 +5,8 @@ const handlerGlobalError = (err, _req, res, _next) => {
   // com o middleware de erro global não precisamos de try/catch em nosso controller
   const errorSql = mapErrorSql(err); // mapeamento de erros vindos do mysql com base no code status
   if (errorSql) {
+    console.log(err);
+
     // se o erro for truthy retorna esse erro
     return res.status(errorSql.status).json({ message: errorSql.message });
   }
