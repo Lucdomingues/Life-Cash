@@ -15,15 +15,6 @@ export const create = async (columns, n_values, values) => {
   return result;
 };
 
-export const update = async (columns, n_values, values) => {
-  const [result] = await connection.execute(
-    `INSERT INTO transactions (${columns}) VALUES (${n_values});`,
-    values,
-  );
-
-  return result;
-};
-
 export const deleted = async (id) => {
   const [person] = await connection.execute(
     "SELECT person_id FROM transactions WHERE id = ?;", // busca o person_id para registrar no log
