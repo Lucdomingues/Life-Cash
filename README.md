@@ -1,73 +1,305 @@
 # API LIFECASH
 
-API Rest para registrar as receitas e despesas de uma pessoa!
+API REST para gerenciamento de receitas e despesas de usuários, com controle de histórico de operações e soft delete para preservação de dados.
 
-Temos os seguintes contratos:
+## Sumário
 
-- Tabela people: que armazenará informações das pessoas que utilizarão a aplicação;
-- Tabela transactions: que armazenará informações sobre as transações de despesa ou receita das pessoas cadastradas;
-- Tabela logs: que armazenará os logs das operações realizadas nas tabelas people e transactions.
+- [Objetivo do Projeto](#objetivo-do-projeto)
+- [Modelo de Dados](#modelo-de-dados)
+  - [Tabela: people](#tabela-people)
+  - [Tabela: transactions](#tabela-transactions)
+  - [Tabela: logs](#tabela-logs)
+  - [Finalidade dos logs](#finalidade-dos-logs)
+- [Rotas da API](#rotas-da-api)
+  - [People](#people)
+  - [Transactions](#transactions)
+- [Decisões Técnicas Importantes](#decisões-técnicas-importantes)
+  - [Soft Delete apenas em People](#soft-delete-apenas-em-people)
+  - [Logs como mecanismo de auditoria](#logs-como-mecanismo-de-auditoria)
+  - [MySQL2 com Pool de Conexões](#mysql2-com-pool-de-conexões)
+- [Como Inicializar o Projeto](#como-inicializar-o-projeto)
+  - [Rodando com Docker (Recomendado)](#rodando-com-docker-recomendado)
+  - [Rodando sem Docker](#rodando-sem-docker)
+- [Scripts](#scripts)
+- [Conclusão](#conclusão)
 
-## Diagrama ER(Entidade Relacionamento)
+## Objetivo do Projeto
 
-![Diagrama ER](./images/diagramER.png)
+Este projeto foi desenvolvido com o objetivo de:
 
-## Configurações iniciais
+- Explorar o uso do **mysql2**
+- Trabalhar com queries **SQL manuais**
+- Aplicar **arquitetura em camadas** (Controller → Service → DB)
+- Implementar middlewares personalizados
+- Criar um sistema de logs para auditoria
+- Aplicar soft delete para manter histórico de usuários desativados
+- Trabalhar com **Docker + MySQL + Healthcheck**
+- Centralizar tratamento de erros
 
-- `npm start` roda a api
-- `npm run dev` roda a api em ambiente de desenvolvimento com `--watch` nativo do node para hot-reload
-- `npm run reset-compose` desce e sobe novamente o compose, **obs: esse comando reseta tudo, inclusive remove todas imagens e containers do sistema**
+O foco principal foi reforçar fundamentos sólidos de backend e organização arquitetural.
 
-## Docker
+## Modelo de Dados
 
-No **Docker Compose** foi adicionado ao serviço de database, `healthcheck`, essa config permite verificar periodicamente se o serviço está saudável, no caso o DB:
+O banco utilizado é o `api_data`.
 
+#### **Tabela**: `people`
 ```
-healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+CREATE TABLE people (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(45) NOT NULL,
+    last_name VARCHAR(45) NOT NULL,
+    email VARCHAR(60) NOT NULL UNIQUE,
+    phone VARCHAR(20) NOT NULL,
+    deleted_at DATETIME NULL
+) ENGINE=InnoDB;
+```
+**Regras importantes:**
+
+- `email` é único.
+- `deleted_at` controla o soft delete.
+- `NULL` → usuário ativo
+- `DATETIME` preenchido → usuário desativado
+
+#### **Tabela**: `transactions`
+```
+CREATE TABLE transactions (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(60) NOT NULL,
+    description VARCHAR(300),
+    price DECIMAL(10,2) NOT NULL,
+    type ENUM('despesa', 'renda') NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    person_id INT NOT NULL,
+    CONSTRAINT fk_transaction_person_id 
+        FOREIGN KEY (person_id) REFERENCES people(id)
+) ENGINE=InnoDB;
+```
+**Regras importantes:**
+
+- `type` pode ser:
+  - despesa
+  - renda
+- Cada transação pertence a uma pessoa `(person_id)`
+- `created_at` é gerado automaticamente pelo banco
+
+#### **Tabela**: `logs`
+```
+CREATE TABLE logs (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    event VARCHAR(100) NOT NULL,
+    timestamp TIMESTAMP NOT NULL,
+    entity VARCHAR(50) NOT NULL,
+    person_id INT NOT NULL,
+    CONSTRAINT fk_logs_person_id 
+        FOREIGN KEY (person_id) REFERENCES people(id)
+) ENGINE=InnoDB;
+```
+#### Finalidade dos logs
+
+A tabela logs registra todas as operações realizadas nas entidades:
+
+- people
+- transactions
+
+**Exemplos de eventos**:
+
+- `CREATED_PEOPLE`
+- `UPDATED_PEOPLE`
+- `DELETED_PEOPLE`
+- `ACTIVED_PEOPLE`
+- `CREATED_TRANSACTION`
+- `DELETED_TRANSACTION`
+
+Isso permite:
+
+- **Rastreabilidade**
+- **Auditoria**
+- **Histórico de ações no sistema**
+
+## Rotas da API
+### PEOPLE
+- **Criar pessoa**
+`POST /people`
+
+  - Body:
+```
+{
+  "first_name": "Lucas",
+  "last_name": "Domingues",
+  "email": "lucas@email.com",
+  "phone": "11999999999"
+}
 ```
 
-No serviço da API adicionamos um `depends_on` com a condição de inicializar somente se `healthy` retornar "ok".
+  - Validações:
+     - Email único
+     - Todos os campos obrigatórios
 
+- **Listar pessoas ativas**
+`GET /people`
+
+Retorna apenas registros onde:
+
+`deleted_at IS NULL`
+
+ - **Buscar pessoa por ID**
+`GET /people/:id`
+
+Retorna apenas se `deleted_at IS NULL`.
+
+ - **Atualizar pessoa**
+`PUT /people/:id`
+
+Body parcial permitido:
 ```
-depends_on:
-      - database:
-          condition: service_healthy # espera o serviço de database estar funcionando de forma saúdavel
+{
+  "first_name": "Lucas Atualizado"
+}
 ```
+ - **Desativar pessoa (Soft Delete)**
+`PATCH /people/:id/disable`
 
-Usamos no volume do database o arquivo `docker-entrypoint-initdb.d` para subir já com um dump para o MYSQL, o dump é o arquivo `lifecash.sql`. Resumindo se o DB estiver vázio ele usa o dump, caso já exista algo no volume ele desconsidera.
+Atualiza:
 
-O volume para persistência dos dados do DB é `mysql_data` recebendo dados do `/var/lib/mysql`, onde o mysql guarda todas as infos do DB.
+`deleted_at = CURRENT_TIMESTAMP`
 
-## Conexão com o DB
+Não remove o registro fisicamente.
 
-- Estamos usando o client mysql2 para se comunicar com o DB
+  - **Reativar pessoa**
+`PATCH /people/:id/active`
 
-Foi criado um Pool de conexões no caminho db/connection.js, este está usando o dotenv para pegar as variáveis, foi definido um limite de 10 conexões simultâneas já que o projeto não necessita de mais e nem de multiplas camadas de pooling.
+Atualiza:
 
-Temos o arquivo `./db/PeopleDB` que substituí o papel da camada model, comunicando com o DB através das funções do aplicativo mysql2 e querys SQL.
+`deleted_at = NULL`
 
-## Tratamento de Erro
+  - **Buscar logs da pessoa**
+`GET /people/:id/logs`
 
-Foi construido um middleware para tratar erros globalmente, tornando a api mais limpa, removendo a necessidade de vários `try/catch` na camada controller. Disparamos os erros instânciando a classe `AppError`, uma classe de erro personalizada herdada de `Error`.
+Retorna registros da tabela logs filtrando por:
 
-O disparo desses erros são realizados dessa maneira:
+`person_id = :id AND entity = 'people'`
 
-`throw new AppError(STATUS, MESSAGE_ERROR);`
+### TRANSACTIONS
+  - **Criar transação**
+`POST /transactions`
 
-No Middleware também tratamos `error 500`.
+     - Body:
+```
+{
+  "name": "Salário",
+  "description": "Salário mensal",
+  "price": 5000.00,
+  "type": "renda",
+  "person_id": 1
+}
+```
+`type` deve ser:
 
-O unico lugar que tratamos error com `try/catch` é no service, pois podem vir exceções do DB caso alguma regra seja infligida.
+"despesa" ou "renda"
 
-### Mapeamento de erros vindos do mysql
+Após criar:
 
-Os erros serão centralizados em apenas um lugar o middleware de erro, para isso tivemos que encontrar uma solução para tratar erros vindos do sql, inclusive, regras de negócios como `Pessoa já cadastrada!`, assim criamos um **mapeamento de erros sql**, o mysql lança o erro e com base em seu code definimos as mensagens e entregamos ao cuidado do middleware global. O mapeamento está no mesmo diretório do middleware de erro em: `./error/mapErrorSql.js`.
+Um log é automaticamente registrado.
 
-## Middlewares
+  - **Listar transações**
+`GET /transactions`
 
-Temos a pasta middlewares e dentro a pasta schema, para a validação dos formatos de body, params e querys estamos usando a biblioteca **zod**, para melhor legibilidade e escalabilidade.
+      - Retorna todas as transações cadastradas.
 
-Em `middlewares/validateFormat.middleware.js` está um middleware genérico para validar os schemas que serão inseridos na camada de `Routes`.
+  - **Deletar transação**
+`DELETE /transactions/:id`
+
+      - Remove fisicamente do banco.
+      - Registra log automaticamente.
+
+## Decisões Técnicas Importantes
+### Soft Delete apenas em People
+
+Foi aplicado soft delete apenas na tabela people porque:
+- O histórico de usuários precisa ser preservado
+- Os logs dependem da existência do `person_id`
+- Permite rastrear operações de usuários desativados
+
+### Logs como mecanismo de auditoria
+
+O sistema de logs foi pensado para:
+- Registrar ações críticas
+- Manter histórico mesmo após exclusões
+- Facilitar rastreabilidade futura
+
+### MySQL2 com Pool de Conexões
+
+Foi utilizado:
+
+- mysql2
+
+Com:
+
+- Pool de conexões
+- Limite de 10 conexões simultâneas
+- Queries SQL manuais (sem ORM)
+
+**Objetivo**: reforçar domínio de SQL puro e controle total das queries.
+
+## Como Inicializar o Projeto
+
+### Rodando com Docker **(Recomendado)**
+
+ 1. Criar arquivo `.env`
+ 2. Executar:
+
+```docker compose up -d```
+
+A API estará disponível em:
+
+`http://localhost:3000`
+
+- Reset completo do ambiente
+```npm run reset-compose```
+
+**!Esse comando**:
+
+- Remove containers
+- Remove imagens
+- Remove volumes
+
+Reinicializa o banco usando o dump `lifecash.sql`
+
+### Rodando sem Docker
+
+1. Instalar dependências:
+
+```npm install```
+
+2. Criar banco `api_data` manualmente
+
+3. Executar:
+
+```npm run dev```
+
+## Scripts
+
+`"start": "node src/server.js"`
+
+Executa a aplicação normalmente.
+
+`"dev": "node --watch src/server.js"`
+
+Executa com **hot reload** nativo do Node.
+
+`"reset-compose": "docker compose down && docker system prune -af && docker compose up -d"`
+
+Reseta completamente o ambiente Docker.
+
+## Conclusão
+
+Este projeto não foi desenvolvido apenas como um CRUD simples, mas como um exercício de:
+
+- Organização arquitetural
+- Estruturação de camadas
+- Tratamento centralizado de erros
+- Validação com **Zod**
+- Uso de **MySQL2** com **SQL** manual
+- Auditoria com logs
+- Soft delete estratégico
+- Containerização com **Docker**
