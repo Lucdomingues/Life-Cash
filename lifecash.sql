@@ -25,6 +25,6 @@ CREATE TABLE logs (
     event VARCHAR(100) NOT NULL,
     timestamp timestamp NOT NULL,
     entity VARCHAR(50) NOT NULL,
-    person_id INT,
+    person_id INT NOT NULL,
     CONSTRAINT fk_logs_person_id FOREIGN KEY (person_id) REFERENCES people(id)
 ) ENGINE=InnoDB;
