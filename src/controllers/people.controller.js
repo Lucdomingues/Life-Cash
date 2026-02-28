@@ -1,4 +1,5 @@
 import {
+  activedPeople,
   createPeople,
   deletedPeople,
   getPeople,
@@ -33,6 +34,12 @@ export const updatePeopleController = async (req, res) => {
 
 export const deletePeopleController = async (req, res) => {
   const { status, message } = await deletedPeople(req.params.id);
+
+  return res.status(status).json(message);
+};
+
+export const activePeopleController = async (req, res) => {
+  const { status, message } = await activedPeople(req.params.id);
 
   return res.status(status).json(message);
 };

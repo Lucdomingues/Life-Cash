@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  activePeopleController,
   createPeopleController,
   deletePeopleController,
   getLogPeopleController,
@@ -30,10 +31,16 @@ router.put(
   updatePeopleController,
 );
 
-router.delete(
-  "/:id",
+router.patch(
+  "/:id/deactivate",
   validateFormat(idSchema, "params"),
   deletePeopleController,
+);
+
+router.patch(
+  "/:id/activate",
+  validateFormat(idSchema, "params"),
+  activePeopleController,
 );
 
 router.get(

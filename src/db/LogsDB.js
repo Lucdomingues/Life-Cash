@@ -7,10 +7,10 @@ export const insertLogs = async (event, entity, person_id) => {
   );
 };
 
-export const getLogs = async (person_id) => {
+export const getLogs = async (person_id, entity) => {
   const [logs] = await connection.execute(
-    `SELECT * FROM logs WHERE person_id = ?;`,
-    [person_id],
+    `SELECT * FROM logs WHERE person_id = ? AND entity = ?;`, // irá mostrar os logs de acordo com a rota, se for people ou transactions
+    [person_id, entity],
   );
 
   return logs;

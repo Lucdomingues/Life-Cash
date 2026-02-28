@@ -1,5 +1,12 @@
 import { insertLogs, getLogs } from "../db/LogsDB.js";
-import { create, deleted, getAll, getById, update } from "../db/PeopleDB.js";
+import {
+  actived,
+  create,
+  disabled,
+  getAll,
+  getById,
+  update,
+} from "../db/PeopleDB.js";
 import AppError from "../error/AppError.js";
 
 export const getPeople = async () => {
@@ -54,17 +61,29 @@ export const updatePeople = async (body, id) => {
 };
 
 export const deletedPeople = async (id) => {
-  const del = await deleted(id);
+  const del = await disabled(id);
 
-  if (del.affectedRows === 0) throw new AppError(404, "Pessoa não encontrada"); // lança erro caso não exista
+  if (del.affectedRows === 0)
+    throw new AppError(404, "Pessoa não encontrada ou desabilitada!"); // lança erro caso não exista
 
   await insertLogs("DELETED_PEOPLE", "people", id); // inseri log para registrar no histórico a desativação dessa pessoa
 
   return { status: 200, message: "Desativado com sucesso!" };
 };
 
+export const activedPeople = async (id) => {
+  const act = await actived(id);
+
+  if (act.affectedRows === 0)
+    throw new AppError(404, "Pessoa não encontrada ou já está ativa!"); // lança erro caso não exista
+
+  await insertLogs("ACTIVED_PEOPLE", "people", id); // inseri log para registrar no histórico a desativação dessa pessoa
+
+  return { status: 200, message: "Ativada com sucesso!" };
+};
+
 export const getPeopleLogs = async (id) => {
-  const logs = await getLogs(id);
+  const logs = await getLogs(id, "people");
 
   if (logs.length === 0) throw new AppError(404, "Logs não encontrados!"); // lança erro caso não exista
 

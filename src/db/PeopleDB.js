@@ -44,9 +44,18 @@ export const update = async (keys, values) => {
   return results;
 };
 
-export const deleted = async (id) => {
+export const disabled = async (id) => {
   const [result] = await connection.execute(
     `UPDATE people SET deleted_at = CURRENT_TIMESTAMP WHERE id = ? AND deleted_at IS NULL`, // pega o timestamp do próprio banco, convertido para a formatação correta
+    [id],
+  );
+
+  return result;
+};
+
+export const actived = async (id) => {
+  const [result] = await connection.execute(
+    `UPDATE people SET deleted_at = null WHERE id = ? AND deleted_at IS NOT NULL`,
     [id],
   );
 
